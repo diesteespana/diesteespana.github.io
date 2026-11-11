@@ -130,8 +130,8 @@ export const COMMANDS: Command[] = [
     cmd: "hobbies",
     hint: { es: "fuera del código", en: "away from code" },
     out: {
-      es: "Ajedrez y fútbol: soy capitán de mi equipo.",
-      en: "Chess and football: I captain my team.",
+      es: "Lectura, fútbol y ajedrez.",
+      en: "Reading, football and chess.",
     },
   },
 ];
