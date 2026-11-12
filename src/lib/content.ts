@@ -267,7 +267,8 @@ export const ENTRIES: Entry[] = [
   {
     id: "urjc",
     kind: "study",
-    when: { es: "2022 – 2027", en: "2022 – 2027" },
+    current: true,
+    when: { es: "2022 – hoy (fin 2027)", en: "2022 – now (ends 2027)" },
     title: { es: "Grado en Ingeniería Informática", en: "BSc in Computer Engineering" },
     where: { es: "Universidad Rey Juan Carlos, Madrid", en: "Universidad Rey Juan Carlos, Madrid" },
     summary: {
