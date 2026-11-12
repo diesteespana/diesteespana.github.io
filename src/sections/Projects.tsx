@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import * as m from "motion/react-m";
 import { animate, createDraggable, stagger, utils, type Draggable } from "animejs";
 import { ArrowUpRight, Camera, RotateCcw } from "lucide-react";
@@ -113,23 +113,34 @@ function PumpVisual() {
     13: { es: "Nuevo máximo: aviso por Discord", en: "New high: Discord alert" },
   };
   const shown = hover ?? 13;
+  // La linea se descubre con un recorte que crece de izquierda a derecha. Antes se animaba
+  // pathLength (stroke-dasharray), que algunos navegadores con escalado de pantalla no pintaban.
+  const clip = `pw-reveal-${useId().replace(/:/g, "")}`;
   return (
     <VisualCard title={lang === "es" ? "Precio con avisos" : "Price with alerts"}>
-      <svg viewBox={`-8 -8 ${w + 16} ${h + 16}`} className="h-auto w-full overflow-visible" onPointerLeave={() => setHover(null)}>
+      <m.svg
+        viewBox={`-8 -8 ${w + 16} ${h + 16}`}
+        className="h-auto w-full overflow-visible"
+        onPointerLeave={() => setHover(null)}
+        initial="oculta"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.3 }}
+      >
+        <defs>
+          <clipPath id={clip}>
+            <m.rect
+              x={-8}
+              y={-8}
+              height={h + 16}
+              variants={{ oculta: { width: 0 }, visible: { width: w + 16 } }}
+              transition={{ duration: 1.4, ease: EASE_CRISP, delay: 0.2 }}
+            />
+          </clipPath>
+        </defs>
         {[0, 1, 2, 3].map((k) => (
           <line key={k} x1="0" x2={w} y1={(k * h) / 3} y2={(k * h) / 3} stroke="rgb(var(--line))" strokeDasharray="3 4" />
         ))}
-        <m.path
-          d={d}
-          fill="none"
-          stroke="rgb(var(--brand))"
-          strokeWidth="2.2"
-          strokeLinejoin="round"
-          initial={{ pathLength: 0 }}
-          whileInView={{ pathLength: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 1.4, ease: EASE_CRISP, delay: 0.2 }}
-        />
+        <path d={d} fill="none" stroke="rgb(var(--brand))" strokeWidth="2.2" strokeLinejoin="round" clipPath={`url(#${clip})`} />
         {pins.map((i) => (
           <g key={i} onPointerEnter={() => setHover(i)} onClick={() => setHover(i)} className="cursor-pointer">
             <circle cx={px(i)} cy={py(PRICE[i])} r="14" fill="transparent" />
@@ -145,7 +156,7 @@ function PumpVisual() {
             />
           </g>
         ))}
-      </svg>
+      </m.svg>
       <p className="mt-2 rounded border border-surface-border bg-surface-sunken px-2.5 py-1.5 font-mono text-[11px] text-ink-2">→ {news[shown][lang]}</p>
     </VisualCard>
   );

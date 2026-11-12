@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import * as m from "motion/react-m";
-import { AnimatePresence } from "motion/react";
 import { animate, stagger, svg, utils } from "animejs";
 import { BarChart3, Database, Layers, Server } from "lucide-react";
 import { Reveal } from "@/components/Reveal";
@@ -70,8 +69,6 @@ export function Now() {
     return () => io.disconnect();
   }, []);
 
-  const node = PIPELINE[active];
-
   return (
     <section id="ahora" className="scroll-mt-20 px-4 py-24 md:px-8 md:py-32" aria-labelledby="now-title">
       <div className="mx-auto max-w-6xl">
@@ -134,23 +131,30 @@ export function Now() {
             </ol>
           </div>
 
-          <div className="relative mt-8 min-h-[120px]">
-            <AnimatePresence mode="wait" initial={false}>
-              <m.div
-                key={node.id + lang}
-                className="well rounded-lg p-5 md:p-6"
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.22, ease: EASE_CRISP }}
-              >
-                <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-wider text-brand">
-                  <span className="h-1.5 w-1.5 rounded-full bg-spark" />
-                  {lang === "es" ? `Paso ${active + 1} de 4` : `Step ${active + 1} of 4`} · {node.name}
-                </p>
-                <p className="mt-2 text-[15px] leading-7 text-ink">{t(node.detail)}</p>
-              </m.div>
-            </AnimatePresence>
+          {/* Los cuatro textos apilados en la misma celda: la caja mide siempre lo que el mas largo
+              y no empuja la pagina cada vez que cambia el paso solo. */}
+          <div className="relative mt-8">
+            <div className="grid">
+              {PIPELINE.map((p, k) => {
+                const on = k === active;
+                return (
+                  <m.div
+                    key={p.id}
+                    aria-hidden={!on}
+                    className={cn("well rounded-lg p-5 [grid-area:1/1] md:p-6", !on && "pointer-events-none")}
+                    initial={false}
+                    animate={{ opacity: on ? 1 : 0, y: on ? 0 : 8 }}
+                    transition={{ duration: 0.25, ease: EASE_CRISP }}
+                  >
+                    <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-wider text-brand">
+                      <span className="h-1.5 w-1.5 rounded-full bg-spark" />
+                      {lang === "es" ? `Paso ${k + 1} de 4` : `Step ${k + 1} of 4`} · {p.name}
+                    </p>
+                    <p className="mt-2 text-[15px] leading-7 text-ink">{t(p.detail)}</p>
+                  </m.div>
+                );
+              })}
+            </div>
             {!touched && (
               <div className="mt-3 h-0.5 overflow-hidden rounded-full bg-surface-border" aria-hidden>
                 <m.div key={active} className="h-full origin-left bg-brand/50" initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: 3.8, ease: "linear" }} />

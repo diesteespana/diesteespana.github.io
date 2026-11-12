@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import * as m from "motion/react-m";
-import { AnimatePresence } from "motion/react";
 import { animate, splitText, stagger, utils } from "animejs";
 import { ArrowRight, Mail, MapPin } from "lucide-react";
 import ShimmerText from "@/components/kokonutui/shimmer-text";
@@ -76,19 +75,25 @@ export function Hero() {
 
           <p className="mt-6 max-w-xl font-display text-[1.45rem] font-medium leading-snug tracking-tight text-ink-2 md:text-[1.75rem]">
             {t(HERO.lead)}{" "}
-            <span className="relative inline-flex h-[1.3em] overflow-hidden align-bottom">
-              <AnimatePresence mode="popLayout" initial={false}>
-                <m.span
-                  key={words[i]}
-                  className="mark inline-block whitespace-nowrap font-semibold"
-                  initial={{ y: "100%", opacity: 0 }}
-                  animate={{ y: "0%", opacity: 1 }}
-                  exit={{ y: "-100%", opacity: 0 }}
-                  transition={SPRING}
-                >
-                  {words[i]}
-                </m.span>
-              </AnimatePresence>
+            {/* Todas las palabras apiladas en la misma celda: el hueco mide lo que la mas larga,
+                asi la frase no cambia de linea (ni de altura) cada vez que rota la palabra. */}
+            <span className="relative inline-grid h-[1.3em] overflow-hidden align-bottom">
+              {words.map((wd, k) => {
+                const on = k === i;
+                const prev = k === (i - 1 + words.length) % words.length;
+                return (
+                  <m.span
+                    key={wd}
+                    aria-hidden={!on}
+                    className="mark inline-block justify-self-start whitespace-nowrap font-semibold [grid-area:1/1]"
+                    initial={false}
+                    animate={{ y: on ? "0%" : prev ? "-100%" : "100%", opacity: on ? 1 : 0 }}
+                    transition={on || prev ? SPRING : { duration: 0 }}
+                  >
+                    {wd}
+                  </m.span>
+                );
+              })}
             </span>
           </p>
 
